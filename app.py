@@ -7,8 +7,8 @@ import traceback
 app = Flask(__name__)
 CORS(app)
 
-# Load your OpenAI API key from environment variable
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Load your OpenAI API key
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @app.route('/api/remedies/ai', methods=['GET'])
 def get_ai_remedy():
@@ -20,7 +20,7 @@ def get_ai_remedy():
     Suggest appropriate homeopathic and allopathic remedies with dosage or potency where applicable."""
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful medical assistant."},
@@ -28,7 +28,7 @@ def get_ai_remedy():
             ],
             max_tokens=300
         )
-        remedy = response['choices'][0]['message']['content']
+        remedy = response.choices[0].message.content
         return jsonify({"remedy": remedy})
 
     except Exception as e:
