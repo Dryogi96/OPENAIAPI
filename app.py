@@ -26,19 +26,19 @@ def get_ai_remedy():
                 {"role": "system", "content": "You are a helpful medical assistant."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=200
+            max_tokens=300
         )
-
         remedy = response['choices'][0]['message']['content']
         return jsonify({"remedy": remedy})
 
     except Exception as e:
-        print("❌ AI Exception:", traceback.format_exc())
+        print("🔥 Exception occurred:", e)
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 @app.route('/')
 def index():
-    return "AI Remedy API running"
+    return "✅ AI Remedy API running!"
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
