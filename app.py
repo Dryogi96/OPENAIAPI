@@ -40,7 +40,9 @@ def get_ai_remedy():
         result = response['choices'][0]['message']['content']
         return jsonify({"remedy": result})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    import traceback
+    print("❌ Exception occurred:", traceback.format_exc())
+    return jsonify({"error": str(e)}), 500
 
 # Bind to correct host and port for Render
 if __name__ == '__main__':
