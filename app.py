@@ -6,8 +6,12 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# Load your OpenAI API key from environment variable
+# Load OpenAI API key from environment variable
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
+@app.route('/')
+def index():
+    return "✅ AI Remedy API is running!"
 
 @app.route('/api/remedies/ai', methods=['GET'])
 def get_ai_remedy():
@@ -15,28 +19,29 @@ def get_ai_remedy():
     if not symptoms:
         return jsonify({"error": "No symptoms provided"}), 400
 
-    prompt = f"""You are an experienced doctor. A patient has the following symptoms: {symptoms}.
-    Suggest appropriate homeopathic or allopathic remedies with dosage or potency where applicable."""
+    prompt = f"""
+    A patient is reporting the following symptoms: {symptoms}.
+    Suggest suitable remedies in two formats:
+    🏥 Homeopathic Remedy (include name + potency if possible)
+    💊 Allopathic Remedy (include name + dosage if possible)
+    Keep it simple and clear.
+    """
 
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # Or gpt-4
+            model="gpt-3.5-turbo",  # Change to "gpt-4" if preferred
             messages=[
-                {"role": "system", "content": "You are a helpful medical assistant."},
+                {"role": "system", "content": "You are a helpful and experienced medical assistant."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=200
+            max_tokens=300,
+            temperature=0.7
         )
-
-        remedy = response['choices'][0]['message']['content']
-        return jsonify({"remedy": remedy})
-
+        result = response['choices'][0]['message']['content']
+        return jsonify({"remedy": result})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/')
-def index():
-    return "AI Remedy API running"
-
+# Bind to correct host and port for Render
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
